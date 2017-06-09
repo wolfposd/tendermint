@@ -21,9 +21,9 @@ const (
 	VoteChannel        = byte(0x22)
 	VoteSetBitsChannel = byte(0x23)
 
-	peerGossipSleepDuration     = 100 * time.Millisecond // Time to sleep if there's nothing to send.
-	peerQueryMaj23SleepDuration = 2 * time.Second        // Time to sleep after each VoteSetMaj23Message sent
-	maxConsensusMessageSize     = 1048576                // 1MB; NOTE: keep in sync with types.PartSet sizes.
+	peerGossipSleepDuration     = 10 * time.Millisecond // Time to sleep if there's nothing to send.
+	peerQueryMaj23SleepDuration = 10 * time.Millisecond //  * time.Second        // Time to sleep after each VoteSetMaj23Message sent
+	maxConsensusMessageSize     = 1048576               // 1MB; NOTE: keep in sync with types.PartSet sizes.
 )
 
 //-----------------------------------------------------------------------------

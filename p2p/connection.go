@@ -21,7 +21,7 @@ const (
 	minWriteBufferSize = 65536
 	updateState        = 2 * time.Second
 	pingTimeout        = 40 * time.Second
-	flushThrottle      = 100 * time.Millisecond
+	flushThrottle      = 10 * time.Millisecond
 
 	defaultSendQueueCapacity   = 1
 	defaultSendRate            = int64(512000) // 500KB/s
