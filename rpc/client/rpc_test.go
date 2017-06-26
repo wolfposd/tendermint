@@ -17,7 +17,7 @@ func getHTTPClient() *client.HTTP {
 	return client.NewHTTP(rpcAddr, "/websocket")
 }
 
-func getLocalClient() client.Local {
+func getLocalClient() *client.Local {
 	return client.NewLocal(node)
 }
 

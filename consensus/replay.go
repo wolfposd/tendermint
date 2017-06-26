@@ -96,24 +96,24 @@ func (cs *ConsensusState) readReplayMessage(msgBytes []byte, newStepCh chan inte
 // replay only those messages since the last block.
 // timeoutRoutine should run concurrently to read off tickChan
 func (cs *ConsensusState) catchupReplay(csHeight int) error {
-
 	// set replayMode
 	cs.replayMode = true
 	defer func() { cs.replayMode = false }()
+	walGroup := cs.wal.Group()
 
 	// Ensure that ENDHEIGHT for this height doesn't exist
 	// NOTE: This is just a sanity check. As far as we know things work fine without it,
 	// and Handshake could reuse ConsensusState if it weren't for this check (since we can crash after writing ENDHEIGHT).
-	gr, found, err := cs.wal.group.Search("#ENDHEIGHT: ", makeHeightSearchFunc(csHeight))
+	gr, found, err := walGroup.Search("#ENDHEIGHT: ", makeHeightSearchFunc(csHeight))
 	if gr != nil {
 		gr.Close()
 	}
 	if found {
-		return errors.New(cmn.Fmt("WAL should not contain #ENDHEIGHT %d.", csHeight))
+		return fmt.Errorf("WAL should not contain #ENDHEIGHT %d.", csHeight)
 	}
 
 	// Search for last height marker
-	gr, found, err = cs.wal.group.Search("#ENDHEIGHT: ", makeHeightSearchFunc(csHeight-1))
+	gr, found, err = walGroup.Search("#ENDHEIGHT: ", makeHeightSearchFunc(csHeight-1))
 	if err == io.EOF {
 		cs.Logger.Error("Replay: wal.group.Search returned EOF", "#ENDHEIGHT", csHeight-1)
 	} else if err != nil {
@@ -339,11 +339,10 @@ func (h *Handshaker) replayBlocks(proxyApp proxy.AppConns, appBlockHeight, store
 func (h *Handshaker) replayBlock(height int, proxyApp proxy.AppConnConsensus) ([]byte, error) {
 	mempool := types.MockMempool{}
 
-	var eventCache types.Fireable // nil
 	block := h.store.LoadBlock(height)
 	meta := h.store.LoadBlockMeta(height)
 
-	if err := h.state.ApplyBlock(eventCache, proxyApp, block, meta.BlockID.PartsHeader, mempool); err != nil {
+	if err := h.state.ApplyBlock(types.NopEventBus{}, proxyApp, block, meta.BlockID.PartsHeader, mempool); err != nil {
 		return nil, err
 	}
 

@@ -134,6 +134,8 @@ imports:
   - flowrate
   - log
   - merkle
+  - pubsub
+  - pubsub/query
   - test
 - name: golang.org/x/crypto
   version: 7d9177d70076375b9a59c8fde23d52d9c4a7ecd5

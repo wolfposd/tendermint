@@ -98,7 +98,7 @@ type Node struct {
 	addrBook *p2p.AddrBook         // known peers
 
 	// services
-	evsw             types.EventSwitch           // pub/sub for services
+	eventBus         *types.EventBus             // pub/sub for services
 	blockStore       *bc.BlockStore              // store the blockchain to disk
 	bcReactor        *bc.BlockchainReactor       // for fast-syncing
 	mempoolReactor   *mempl.MempoolReactor       // for gossipping transactions
@@ -177,13 +177,6 @@ func NewNode(config *cfg.Config,
 
 	// Generate node PrivKey
 	privKey := crypto.GenPrivKeyEd25519()
-
-	// Make event switch
-	eventSwitch := types.NewEventSwitch()
-	eventSwitch.SetLogger(logger.With("module", "types"))
-	if _, err := eventSwitch.Start(); err != nil {
-		return nil, fmt.Errorf("Failed to start switch: %v", err)
-	}
 
 	// Decide whether to fast-sync or not
 	// We don't fast-sync when the only validator is us.
@@ -271,14 +264,16 @@ func NewNode(config *cfg.Config,
 		})
 	}
 
-	// add the event switch to all services
-	// they should all satisfy events.Eventable
-	SetEventSwitch(eventSwitch, bcReactor, mempoolReactor, consensusReactor)
+	eventBus := types.NewEventBus()
+	eventBus.SetLogger(logger.With("module", "events"))
+
+	// services which will be publishing and/or subscribing for messages (events)
+	bcReactor.SetEventBus(eventBus)
+	consensusReactor.SetEventBus(eventBus)
 
 	// run the profile server
 	profileHost := config.ProfListenAddress
 	if profileHost != "" {
-
 		go func() {
 			logger.Error("Profile server", "err", http.ListenAndServe(profileHost, nil))
 		}()
@@ -293,7 +288,6 @@ func NewNode(config *cfg.Config,
 		sw:       sw,
 		addrBook: addrBook,
 
-		evsw:             eventSwitch,
 		blockStore:       blockStore,
 		bcReactor:        bcReactor,
 		mempoolReactor:   mempoolReactor,
@@ -301,6 +295,7 @@ func NewNode(config *cfg.Config,
 		consensusReactor: consensusReactor,
 		proxyApp:         proxyApp,
 		txIndexer:        txIndexer,
+		eventBus:         eventBus,
 	}
 	node.BaseService = *cmn.NewBaseService(logger, "Node", node)
 	return node, nil
@@ -308,6 +303,11 @@ func NewNode(config *cfg.Config,
 
 // OnStart starts the Node. It implements cmn.Service.
 func (n *Node) OnStart() error {
+	_, err := n.eventBus.Start()
+	if err != nil {
+		return err
+	}
+
 	// Create & add listener
 	protocol, address := cmn.ProtocolAndAddress(n.config.P2P.ListenAddress)
 	l := p2p.NewDefaultListener(protocol, address, n.config.P2P.SkipUPNP, n.Logger.With("module", "p2p"))
@@ -316,7 +316,7 @@ func (n *Node) OnStart() error {
 	// Start the switch
 	n.sw.SetNodeInfo(n.makeNodeInfo())
 	n.sw.SetNodePrivKey(n.privKey)
-	_, err := n.sw.Start()
+	_, err = n.sw.Start()
 	if err != nil {
 		return err
 	}
@@ -356,6 +356,8 @@ func (n *Node) OnStop() {
 			n.Logger.Error("Error closing listener", "listener", l, "err", err)
 		}
 	}
+
+	n.eventBus.Stop()
 }
 
 // RunForever waits for an interupt signal and stops the node.
@@ -364,13 +366,6 @@ func (n *Node) RunForever() {
 	cmn.TrapSignal(func() {
 		n.Stop()
 	})
-}
-
-// SetEventSwitch adds the event switch to reactors, mempool, etc.
-func SetEventSwitch(evsw types.EventSwitch, eventables ...types.Eventable) {
-	for _, e := range eventables {
-		e.SetEventSwitch(evsw)
-	}
 }
 
 // AddListener adds a listener to accept inbound peer connections.
@@ -383,7 +378,6 @@ func (n *Node) AddListener(l p2p.Listener) {
 // ConfigureRPC sets all variables in rpccore so they will serve
 // rpc calls from this node
 func (n *Node) ConfigureRPC() {
-	rpccore.SetEventSwitch(n.evsw)
 	rpccore.SetBlockStore(n.blockStore)
 	rpccore.SetConsensusState(n.consensusState)
 	rpccore.SetMempool(n.mempoolReactor.Mempool)
@@ -394,6 +388,7 @@ func (n *Node) ConfigureRPC() {
 	rpccore.SetProxyAppQuery(n.proxyApp.Query())
 	rpccore.SetTxIndexer(n.txIndexer)
 	rpccore.SetConsensusReactor(n.consensusReactor)
+	rpccore.SetEventBus(n.eventBus)
 	rpccore.SetLogger(n.Logger.With("module", "rpc"))
 }
 
@@ -410,7 +405,7 @@ func (n *Node) startRPC() ([]net.Listener, error) {
 	for i, listenAddr := range listenAddrs {
 		mux := http.NewServeMux()
 		rpcLogger := n.Logger.With("module", "rpc-server")
-		wm := rpcserver.NewWebsocketManager(rpccore.Routes, n.evsw)
+		wm := rpcserver.NewWebsocketManager(rpccore.Routes)
 		wm.SetLogger(rpcLogger.With("protocol", "websocket"))
 		mux.HandleFunc("/websocket", wm.WebsocketHandler)
 		rpcserver.RegisterRPCFuncs(mux, rpccore.Routes, rpcLogger)
@@ -459,9 +454,9 @@ func (n *Node) MempoolReactor() *mempl.MempoolReactor {
 	return n.mempoolReactor
 }
 
-// EventSwitch returns the Node's EventSwitch.
-func (n *Node) EventSwitch() types.EventSwitch {
-	return n.evsw
+// EventBus returns the Node's EventBus.
+func (n *Node) EventBus() *types.EventBus {
+	return n.eventBus
 }
 
 // PrivValidator returns the Node's PrivValidator.

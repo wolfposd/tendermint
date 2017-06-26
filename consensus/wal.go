@@ -29,48 +29,63 @@ var _ = wire.RegisterInterface(
 //--------------------------------------------------------
 // Simple write-ahead logger
 
+// WAL is an interface for any write-ahead logger.
+type WAL interface {
+	Save(WALMessage)
+	WriteEndHeight(int)
+	Group() *auto.Group
+
+	Start() (bool, error)
+	Stop() bool
+	Wait()
+}
+
 // Write ahead logger writes msgs to disk before they are processed.
 // Can be used for crash-recovery and deterministic replay
 // TODO: currently the wal is overwritten during replay catchup
 //   give it a mode so it's either reading or appending - must read to end to start appending again
-type WAL struct {
+type baseWAL struct {
 	BaseService
 
 	group *auto.Group
 	light bool // ignore block parts
 }
 
-func NewWAL(walFile string, light bool) (*WAL, error) {
+func NewWAL(walFile string, light bool) (*baseWAL, error) {
 	group, err := auto.OpenGroup(walFile)
 	if err != nil {
 		return nil, err
 	}
-	wal := &WAL{
+	wal := &baseWAL{
 		group: group,
 		light: light,
 	}
-	wal.BaseService = *NewBaseService(nil, "WAL", wal)
+	wal.BaseService = *NewBaseService(nil, "baseWAL", wal)
 	return wal, nil
 }
 
-func (wal *WAL) OnStart() error {
+func (wal *baseWAL) Group() *auto.Group {
+	return wal.group
+}
+
+func (wal *baseWAL) OnStart() error {
 	size, err := wal.group.Head.Size()
 	if err != nil {
 		return err
 	} else if size == 0 {
-		wal.writeEndHeight(0)
+		wal.WriteEndHeight(0)
 	}
 	_, err = wal.group.Start()
 	return err
 }
 
-func (wal *WAL) OnStop() {
+func (wal *baseWAL) OnStop() {
 	wal.BaseService.OnStop()
 	wal.group.Stop()
 }
 
 // called in newStep and for each pass in receiveRoutine
-func (wal *WAL) Save(wmsg WALMessage) {
+func (wal *baseWAL) Save(wmsg WALMessage) {
 	if wal == nil {
 		return
 	}
@@ -94,7 +109,7 @@ func (wal *WAL) Save(wmsg WALMessage) {
 	}
 }
 
-func (wal *WAL) writeEndHeight(height int) {
+func (wal *baseWAL) WriteEndHeight(height int) {
 	wal.group.WriteLine(Fmt("#ENDHEIGHT: %v", height))
 
 	// TODO: only flush when necessary
@@ -102,3 +117,12 @@ func (wal *WAL) writeEndHeight(height int) {
 		PanicQ(Fmt("Error flushing consensus wal buf to file. Error: %v \n", err))
 	}
 }
+
+type nilWAL struct{}
+
+func (nilWAL) Save(m WALMessage)         {}
+func (nilWAL) Group() *auto.Group        { return nil }
+func (nilWAL) WriteEndHeight(height int) {}
+func (nilWAL) Start() (bool, error)      { return true, nil }
+func (nilWAL) Stop() bool                { return true }
+func (nilWAL) Wait()                     {}

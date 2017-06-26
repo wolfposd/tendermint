@@ -4,9 +4,8 @@ import (
 	"strings"
 
 	abci "github.com/tendermint/abci/types"
-	"github.com/tendermint/go-crypto"
+	crypto "github.com/tendermint/go-crypto"
 	"github.com/tendermint/go-wire/data"
-
 	"github.com/tendermint/tendermint/p2p"
 	"github.com/tendermint/tendermint/types"
 )
@@ -125,6 +124,6 @@ type ResultSubscribe struct{}
 type ResultUnsubscribe struct{}
 
 type ResultEvent struct {
-	Name string            `json:"name"`
-	Data types.TMEventData `json:"data"`
+	Query string            `json:"query"`
+	Data  types.TMEventData `json:"data"`
 }

@@ -113,7 +113,7 @@ func setup() {
 	tcpLogger := logger.With("socket", "tcp")
 	mux := http.NewServeMux()
 	server.RegisterRPCFuncs(mux, Routes, tcpLogger)
-	wm := server.NewWebsocketManager(Routes, nil, server.ReadWait(5*time.Second), server.PingPeriod(1*time.Second))
+	wm := server.NewWebsocketManager(Routes, server.ReadWait(5*time.Second), server.PingPeriod(1*time.Second))
 	wm.SetLogger(tcpLogger)
 	mux.HandleFunc(websocketEndpoint, wm.WebsocketHandler)
 	go func() {
@@ -126,7 +126,7 @@ func setup() {
 	unixLogger := logger.With("socket", "unix")
 	mux2 := http.NewServeMux()
 	server.RegisterRPCFuncs(mux2, Routes, unixLogger)
-	wm = server.NewWebsocketManager(Routes, nil)
+	wm = server.NewWebsocketManager(Routes)
 	wm.SetLogger(unixLogger)
 	mux2.HandleFunc(websocketEndpoint, wm.WebsocketHandler)
 	go func() {

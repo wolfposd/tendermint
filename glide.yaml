@@ -41,6 +41,7 @@ import:
   - flowrate
   - log
   - merkle
+  - pubsub
 - package: golang.org/x/crypto
   subpackages:
   - nacl/box
