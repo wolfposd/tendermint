@@ -6,7 +6,7 @@ const Fix = "0"
 
 var (
 	// The full version string
-	Version = "0.10.0-low-latency-v1"
+	Version = "0.10.0-low-latency-v2"
 
 	// GitCommit is set with --ldflags "-X main.gitCommit=$(git rev-parse HEAD)"
 	GitCommit string
