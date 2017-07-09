@@ -198,6 +198,8 @@ func (s *State) validateBlock(block *types.Block) error {
 		}
 	}
 
+	// TODO: Validate evidence
+
 	return nil
 }
 
