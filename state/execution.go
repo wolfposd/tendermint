@@ -199,11 +199,8 @@ func (s *State) validateBlock(block *types.Block) error {
 	}
 
 	for _, ev := range block.Evidence.Evidence {
-		if err := ev.VoteA.Verify(s.ChainID, ev.PubKey); err != nil {
-			return types.ErrEvidenceInvalid(ev, err)
-		}
-		if err := ev.VoteB.Verify(s.ChainID, ev.PubKey); err != nil {
-			return types.ErrEvidenceInvalid(ev, err)
+		if err := ev.Verify(s.ChainID); err != nil {
+			return types.NewEvidenceInvalidErr(ev, err)
 		}
 	}
 
