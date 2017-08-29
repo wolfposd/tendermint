@@ -198,7 +198,7 @@ func (s *State) validateBlock(block *types.Block) error {
 		}
 	}
 
-	for _, ev := range block.Evidence.Evidence {
+	for _, ev := range block.Evidence.Evidences {
 		if err := ev.Verify(s.ChainID); err != nil {
 			return types.NewEvidenceInvalidErr(ev, err)
 		}
