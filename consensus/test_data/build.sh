@@ -1,8 +1,15 @@
 #!/usr/bin/env bash
 
 # XXX: removes tendermint dir
+# TODO: does not work on OSX
 
-cd "$GOPATH/src/github.com/tendermint/tendermint" || exit 1
+# Get the parent directory of where this script is.
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
+DIR="$( cd -P "$( dirname "$SOURCE" )/../.." && pwd )"
+
+# Change into that dir because we expect that.
+cd "$DIR" || exit
 
 # Make sure we have a tendermint command.
 if ! hash tendermint 2>/dev/null; then
@@ -16,73 +23,72 @@ DIR_TO_COPY=$HOME/.tendermint_test/consensus_state_test
 TMHOME="$HOME/.tendermint"
 rm -rf "$TMHOME"
 cp -r "$DIR_TO_COPY" "$TMHOME"
-cp $TMHOME/config.toml $TMHOME/config.toml.bak
+cp "$TMHOME/config.toml" "$TMHOME/config.toml.bak"
 
 function reset(){
 	tendermint unsafe_reset_all
-	cp $TMHOME/config.toml.bak $TMHOME/config.toml
+	cp "$TMHOME/config.toml.bak" "$TMHOME/config.toml"
 }
 
 reset
 
 # empty block
 function empty_block(){
-tendermint node --proxy_app=persistent_dummy &> /dev/null &
-sleep 5
-killall tendermint
+	tendermint node --proxy_app=persistent_dummy &> /dev/null &
+	sleep 5
+	killall tendermint
 
-# /q would print up to and including the match, then quit.
-# /Q doesn't include the match.
-# http://unix.stackexchange.com/questions/11305/grep-show-all-the-file-up-to-the-match
-sed '/ENDHEIGHT: 1/Q' ~/.tendermint/data/cs.wal/wal  > consensus/test_data/empty_block.cswal
+	# /q would print up to and including the match, then quit.
+	# /q doesn't include the match.
+	# http://unix.stackexchange.com/questions/11305/grep-show-all-the-file-up-to-the-match
+	sed -e "/ENDHEIGHT: 1/Q" ~/.tendermint/data/cs.wal/wal > consensus/test_data/empty_block.cswal
 
-reset
+	reset
 }
 
 # many blocks
 function many_blocks(){
-bash scripts/txs/random.sh 1000 36657 &> /dev/null &
-PID=$!
-tendermint node --proxy_app=persistent_dummy &> /dev/null &
-sleep 7
-killall tendermint
-kill -9 $PID
+	bash scripts/txs/random.sh 1000 36657 &> /dev/null &
+	PID=$!
+	tendermint node --proxy_app=persistent_dummy &> /dev/null &
+	sleep 10
+	killall tendermint
+	kill -9 $PID
 
-sed '/ENDHEIGHT: 6/Q' ~/.tendermint/data/cs.wal/wal  > consensus/test_data/many_blocks.cswal
+	sed -e '/ENDHEIGHT: 6/Q' ~/.tendermint/data/cs.wal/wal  > consensus/test_data/many_blocks.cswal
 
-reset
+	reset
 }
 
 
 # small block 1
 function small_block1(){
-bash scripts/txs/random.sh 1000 36657 &> /dev/null &
-PID=$!
-tendermint node --proxy_app=persistent_dummy &> /dev/null &
-sleep 10
-killall tendermint
-kill -9 $PID
+	bash scripts/txs/random.sh 1000 36657 &> /dev/null &
+	PID=$!
+	tendermint node --proxy_app=persistent_dummy &> /dev/null &
+	sleep 10
+	killall tendermint
+	kill -9 $PID
 
-sed '/ENDHEIGHT: 1/Q' ~/.tendermint/data/cs.wal/wal  > consensus/test_data/small_block1.cswal
+	sed -e '/ENDHEIGHT: 1/Q' ~/.tendermint/data/cs.wal/wal  > consensus/test_data/small_block1.cswal
 
-reset
+	reset
 }
 
 
-# small block 2 (part size = 512)
+# small block 2 (part size = 64)
 function small_block2(){
-echo "" >> ~/.tendermint/config.toml
-echo "block_part_size = 512" >> ~/.tendermint/config.toml
-bash scripts/txs/random.sh 1000 36657 &> /dev/null &
-PID=$!
-tendermint node --proxy_app=persistent_dummy &> /dev/null &
-sleep 5
-killall tendermint
-kill -9 $PID
+	{ echo ""; echo "[consensus]"; echo "block_part_size = 64"; } >> ~/.tendermint/config.toml
+	bash scripts/txs/random.sh 1000 36657 &> /dev/null &
+	PID=$!
+	tendermint node --proxy_app=persistent_dummy &> /dev/null &
+	sleep 5
+	killall tendermint
+	kill -9 $PID
 
-sed '/ENDHEIGHT: 1/Q' ~/.tendermint/data/cs.wal/wal  > consensus/test_data/small_block2.cswal
+	sed -e '/ENDHEIGHT: 1/Q' ~/.tendermint/data/cs.wal/wal  > consensus/test_data/small_block2.cswal
 
-reset
+	reset
 }
 
 
@@ -106,5 +112,3 @@ case "$1" in
 		empty_block
 		many_blocks
 esac
-
-
