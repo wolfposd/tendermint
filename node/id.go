@@ -1,8 +1,9 @@
-package node
+package node // nolint (goimports)
 
 import (
-	"github.com/tendermint/go-crypto"
 	"time"
+
+	"github.com/tendermint/go-crypto"
 )
 
 type NodeID struct {

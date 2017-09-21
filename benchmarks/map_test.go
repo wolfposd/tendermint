@@ -1,4 +1,4 @@
-package benchmarks
+package benchmarks // nolint (goimports)
 
 import (
 	. "github.com/tendermint/tmlibs/common"

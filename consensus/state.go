@@ -487,7 +487,7 @@ func (cs *ConsensusState) updateRoundStep(round int, step RoundStepType) {
 // enterNewRound(height, 0) at cs.StartTime.
 func (cs *ConsensusState) scheduleRound0(rs *RoundState) {
 	//cs.Logger.Info("scheduleRound0", "now", time.Now(), "startTime", cs.StartTime)
-	sleepDuration := rs.StartTime.Sub(time.Now())
+	sleepDuration := rs.StartTime.Sub(time.Now()) // nolint (gotype)
 	cs.scheduleTimeout(sleepDuration, rs.Height, 0, RoundStepNewHeight)
 }
 
@@ -820,10 +820,7 @@ func (cs *ConsensusState) needProofBlock(height int) bool {
 	}
 
 	lastBlockMeta := cs.blockStore.LoadBlockMeta(height - 1)
-	if !bytes.Equal(cs.state.AppHash, lastBlockMeta.Header.AppHash) {
-		return true
-	}
-	return false
+	return !bytes.Equal(cs.state.AppHash, lastBlockMeta.Header.AppHash)
 }
 
 func (cs *ConsensusState) proposalHeartbeat(height, round int) {
