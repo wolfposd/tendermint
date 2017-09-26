@@ -78,7 +78,7 @@ function small_block1(){
 
 # small block 2 (part size = 64)
 function small_block2(){
-	{ echo ""; echo "[consensus]"; echo "block_part_size = 64"; } >> ~/.tendermint/config.toml
+	echo -e "\n[consensus]\nblock_part_size = 64" >> ~/.tendermint/config.toml
 	bash scripts/txs/random.sh 1000 36657 &> /dev/null &
 	PID=$!
 	tendermint node --proxy_app=persistent_dummy &> /dev/null &
