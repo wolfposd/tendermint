@@ -86,7 +86,9 @@ func newOutboundPeer(addr *NetAddress, reactorsByCh map[byte]Reactor, chDescs []
 
 	peer, err := newPeerFromConnAndConfig(conn, true, reactorsByCh, chDescs, onPeerError, ourNodePrivKey, config)
 	if err != nil {
-		conn.Close()
+		if err := conn.Close(); err != nil {
+			return nil, err
+		}
 		return nil, err
 	}
 	return peer, nil
@@ -111,7 +113,9 @@ func newPeerFromConnAndConfig(rawConn net.Conn, outbound bool, reactorsByCh map[
 
 	// Encrypt connection
 	if config.AuthEnc {
-		conn.SetDeadline(time.Now().Add(config.HandshakeTimeout * time.Second))
+		if err := conn.SetDeadline(time.Now().Add(config.HandshakeTimeout * time.Second)); err != nil {
+			return nil, err
+		}
 
 		var err error
 		conn, err = MakeSecretConnection(conn, ourNodePrivKey)
@@ -137,7 +141,7 @@ func newPeerFromConnAndConfig(rawConn net.Conn, outbound bool, reactorsByCh map[
 
 // CloseConn should be used when the peer was created, but never started.
 func (p *peer) CloseConn() {
-	p.conn.Close()
+	p.conn.Close() // nolint: errcheck
 }
 
 // makePersistent marks the peer as persistent.
@@ -158,7 +162,9 @@ func (p *peer) IsPersistent() bool {
 // NOTE: blocking
 func (p *peer) HandshakeTimeout(ourNodeInfo *NodeInfo, timeout time.Duration) error {
 	// Set deadline for handshake so we don't block forever on conn.ReadFull
-	p.conn.SetDeadline(time.Now().Add(timeout))
+	if err := p.conn.SetDeadline(time.Now().Add(timeout)); err != nil {
+		return err
+	}
 
 	var peerNodeInfo = new(NodeInfo)
 	var err1 error
@@ -189,7 +195,9 @@ func (p *peer) HandshakeTimeout(ourNodeInfo *NodeInfo, timeout time.Duration) er
 	}
 
 	// Remove deadline
-	p.conn.SetDeadline(time.Time{})
+	if err := p.conn.SetDeadline(time.Time{}); err != nil {
+		return err
+	}
 
 	peerNodeInfo.RemoteAddr = p.Addr().String()
 
