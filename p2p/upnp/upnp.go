@@ -42,7 +42,7 @@ func Discover() (nat NAT, err error) {
 		return
 	}
 	socket := conn.(*net.UDPConn)
-	defer socket.Close() // nolint (errcheck)
+	defer socket.Close() // nolint: errcheck
 
 	if err := socket.SetDeadline(time.Now().Add(3 * time.Second)); err != nil {
 		return nil, err
@@ -199,7 +199,7 @@ func getServiceURL(rootURL string) (url, urnDomain string, err error) {
 	if err != nil {
 		return
 	}
-	defer r.Body.Close() // nolint (errcheck)
+	defer r.Body.Close() // nolint: errcheck
 
 	if r.StatusCode >= 400 {
 		err = errors.New(string(r.StatusCode))
@@ -298,7 +298,7 @@ func (n *upnpNAT) getExternalIPAddress() (info statusInfo, err error) {
 	var response *http.Response
 	response, err = soapRequest(n.serviceURL, "GetExternalIPAddress", message, n.urnDomain)
 	if response != nil {
-		defer response.Body.Close() // nolint (errcheck)
+		defer response.Body.Close() // nolint: errcheck
 	}
 	if err != nil {
 		return
@@ -347,7 +347,7 @@ func (n *upnpNAT) AddPortMapping(protocol string, externalPort, internalPort int
 	var response *http.Response
 	response, err = soapRequest(n.serviceURL, "AddPortMapping", message, n.urnDomain)
 	if response != nil {
-		defer response.Body.Close() // nolint (errcheck)
+		defer response.Body.Close() // nolint: errcheck
 	}
 	if err != nil {
 		return
@@ -373,7 +373,7 @@ func (n *upnpNAT) DeletePortMapping(protocol string, externalPort, internalPort 
 	var response *http.Response
 	response, err = soapRequest(n.serviceURL, "DeletePortMapping", message, n.urnDomain)
 	if response != nil {
-		defer response.Body.Close() // nolint (errcheck)
+		defer response.Body.Close() // nolint: errcheck
 	}
 	if err != nil {
 		return
