@@ -368,6 +368,7 @@ func (cs *ConsensusState) startRoutines(maxSteps int) {
 	_, err := cs.timeoutTicker.Start()
 	if err != nil {
 		cs.Logger.Error("Error starting timeout ticker", "err", err)
+		return
 	}
 	go cs.receiveRoutine(maxSteps)
 }
@@ -846,6 +847,7 @@ func (cs *ConsensusState) proposalHeartbeat(height, round int) {
 		}
 		if err := cs.privValidator.SignHeartbeat(cs.state.ChainID, heartbeat); err != nil {
 			cs.Logger.Error("Error signing heartbeat", "err", err)
+			return
 		}
 		heartbeatEvent := types.EventDataProposalHeartbeat{heartbeat}
 		types.FireEventProposalHeartbeat(cs.evsw, heartbeatEvent)
