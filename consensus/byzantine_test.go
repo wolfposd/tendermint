@@ -77,7 +77,7 @@ func TestByzantine(t *testing.T) {
 		conR.SetLogger(logger.With("validator", i))
 		conR.SetEventSwitch(eventSwitch)
 
-		var conRI p2p.Reactor // nolint: gotype
+		var conRI p2p.Reactor // nolint: gotype, gosimple
 		conRI = conR
 
 		if i == 0 {
@@ -290,12 +290,12 @@ func (privVal *ByzantinePrivValidator) SignVote(chainID string, vote *types.Vote
 }
 
 func (privVal *ByzantinePrivValidator) SignProposal(chainID string, proposal *types.Proposal) (err error) {
-	proposal.Signature, err = privVal.Sign(types.SignBytes(chainID, proposal))
+	proposal.Signature, _ = privVal.Sign(types.SignBytes(chainID, proposal))
 	return nil
 }
 
 func (privVal *ByzantinePrivValidator) SignHeartbeat(chainID string, heartbeat *types.Heartbeat) (err error) {
-	heartbeat.Signature, err = privVal.Sign(types.SignBytes(chainID, heartbeat))
+	heartbeat.Signature, _ = privVal.Sign(types.SignBytes(chainID, heartbeat))
 	return nil
 }
 

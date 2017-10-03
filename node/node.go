@@ -358,7 +358,7 @@ func (n *Node) OnStop() {
 	}
 }
 
-// RunForever waits for an interupt signal and stops the node.
+// RunForever waits for an interrupt signal and stops the node.
 func (n *Node) RunForever() {
 	// Sleep forever and then...
 	cmn.TrapSignal(func() {
