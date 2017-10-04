@@ -2,7 +2,7 @@ Configuration
 =============
 
 TendermintCore can be configured via a TOML file in
-``$TMHOME/config.toml``. Some of these parameters can be overridden by
+``$TMHOME/config/config.toml``. Some of these parameters can be overridden by
 command-line flags.
 
 Config parameters
@@ -19,11 +19,11 @@ The main config parameters are defined
 -  ``fast_sync``: Whether to sync faster from the block pool. *Default*:
    ``true``
 -  ``genesis_file``: The location of the genesis file. *Default*:
-   ``"$TMHOME/genesis.json"``
+   ``"$TMHOME/config/genesis.json"``
 -  ``log_level``: *Default*: ``"state:info,*:error"``
 -  ``moniker``: Name of this node. *Default*: ``"anonymous"``
 -  ``priv_validator_file``: Validator private key file. *Default*:
-   ``"$TMHOME/priv_validator.json"``
+   ``"$TMHOME/config/priv_validator.json"``
 -  ``prof_laddr``: Profile listen address. *Default*: ``""``
 -  ``proxy_app``: The ABCI app endpoint. *Default*:
    ``"tcp://127.0.0.1:46658"``

@@ -6,6 +6,20 @@ import (
 	"time"
 )
 
+var (
+	DefaultTendermintDir = ".tendermint"
+	DefaultConfigDir     = "config"
+	DefaultDataDir       = "data"
+
+	DefaultConfigFileName  = "config.toml"
+	DefaultGenesisJSONName = "genesis.json"
+	DefaultPrivValName     = "priv_validator.json"
+
+	DefaultConfigFilePath  = filepath.Join(DefaultConfigDir, DefaultConfigFileName)
+	DefaultGenesisJSONPath = filepath.Join(DefaultConfigDir, DefaultGenesisJSONName)
+	DefaultPrivValPath     = filepath.Join(DefaultConfigDir, DefaultPrivValName)
+)
+
 // Config defines the top level configuration for a Tendermint node
 type Config struct {
 	// Top level options use an anonymous struct
@@ -106,8 +120,8 @@ type BaseConfig struct {
 // DefaultBaseConfig returns a default base configuration for a Tendermint node
 func DefaultBaseConfig() BaseConfig {
 	return BaseConfig{
-		Genesis:           "config/genesis.json",
-		PrivValidator:     "config/priv_validator.json",
+		Genesis:           DefaultGenesisJSONPath,
+		PrivValidator:     DefaultPrivValPath,
 		Moniker:           "anonymous",
 		ProxyApp:          "tcp://127.0.0.1:46658",
 		ABCI:              "socket",
@@ -278,7 +292,7 @@ func DefaultMempoolConfig() *MempoolConfig {
 		Recheck:      true,
 		RecheckEmpty: true,
 		Broadcast:    true,
-		WalPath:      "data/mempool.wal",
+		WalPath:      filepath.Join(DefaultDataDir, "mempool.wal"),
 	}
 }
 
@@ -366,7 +380,7 @@ func (cfg *ConsensusConfig) PeerQueryMaj23Sleep() time.Duration {
 // DefaultConsensusConfig returns a default configuration for the consensus service
 func DefaultConsensusConfig() *ConsensusConfig {
 	return &ConsensusConfig{
-		WalPath:                     "data/cs.wal/wal",
+		WalPath:                     filepath.Join(DefaultDataDir, "cs.wal/wal"),
 		WalLight:                    false,
 		TimeoutPropose:              3000,
 		TimeoutProposeDelta:         500,
