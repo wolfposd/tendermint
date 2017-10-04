@@ -106,8 +106,8 @@ type BaseConfig struct {
 // DefaultBaseConfig returns a default base configuration for a Tendermint node
 func DefaultBaseConfig() BaseConfig {
 	return BaseConfig{
-		Genesis:           "genesis.json",
-		PrivValidator:     "priv_validator.json",
+		Genesis:           "config/genesis.json",
+		PrivValidator:     "config/priv_validator.json",
 		Moniker:           "anonymous",
 		ProxyApp:          "tcp://127.0.0.1:46658",
 		ABCI:              "socket",

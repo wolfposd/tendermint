@@ -30,7 +30,7 @@ func TestEnsureRoot(t *testing.T) {
 	EnsureRoot(tmpDir)
 
 	// make sure config is set properly
-	data, err := ioutil.ReadFile(filepath.Join(tmpDir, "config.toml"))
+	data, err := ioutil.ReadFile(filepath.Join(tmpDir, "config/config.toml"))
 	require.Nil(err)
 	assert.Equal([]byte(defaultConfig("anonymous")), data)
 
@@ -47,11 +47,11 @@ func TestEnsureTestRoot(t *testing.T) {
 	rootDir := cfg.RootDir
 
 	// make sure config is set properly
-	data, err := ioutil.ReadFile(filepath.Join(rootDir, "config.toml"))
+	data, err := ioutil.ReadFile(filepath.Join(rootDir, "config/config.toml"))
 	require.Nil(err)
 	assert.Equal([]byte(testConfig("anonymous")), data)
 
 	// TODO: make sure the cfg returned and testconfig are the same!
 
-	ensureFiles(t, rootDir, "data", "genesis.json", "priv_validator.json")
+	ensureFiles(t, rootDir, "data", "config/genesis.json", "config/priv_validator.json")
 }

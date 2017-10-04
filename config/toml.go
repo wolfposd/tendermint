@@ -13,9 +13,10 @@ import (
 
 func EnsureRoot(rootDir string) {
 	cmn.EnsureDir(rootDir, 0700)
+	cmn.EnsureDir(rootDir+"/config", 0700)
 	cmn.EnsureDir(rootDir+"/data", 0700)
 
-	configFilePath := path.Join(rootDir, "config.toml")
+	configFilePath := path.Join(rootDir, "config/config.toml")
 
 	// Write default config file if missing.
 	if !cmn.FileExists(configFilePath) {
@@ -67,11 +68,12 @@ func ResetTestRoot(testName string) *Config {
 	}
 	// Create new dir
 	cmn.EnsureDir(rootDir, 0700)
+	cmn.EnsureDir(rootDir+"/config", 0700)
 	cmn.EnsureDir(rootDir+"/data", 0700)
 
-	configFilePath := path.Join(rootDir, "config.toml")
-	genesisFilePath := path.Join(rootDir, "genesis.json")
-	privFilePath := path.Join(rootDir, "priv_validator.json")
+	configFilePath := path.Join(rootDir, "config/config.toml")
+	genesisFilePath := path.Join(rootDir, "config/genesis.json")
+	privFilePath := path.Join(rootDir, "config/priv_validator.json")
 
 	// Write default config file if missing.
 	if !cmn.FileExists(configFilePath) {
