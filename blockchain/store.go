@@ -25,7 +25,7 @@ Currently the precommit signatures are duplicated in the Block parts as
 well as the Commit.  In the future this may change, perhaps by moving
 the Commit data outside the Block. (TODO)
 
-// NOTE: BlockStore methods will panic if they encounter erros
+// NOTE: BlockStore methods will panic if they encounter errors
 // deserializing loaded data, indicated probable corruption on disk.
 */
 type BlockStore struct {
@@ -35,8 +35,8 @@ type BlockStore struct {
 	height int
 }
 
-// NewBlockStore returns a new BlockStore with the given db,
-// initialized to the last committed height.
+// NewBlockStore returns a new BlockStore with the given DB,
+// initialized to the last height that was committed to the DB.
 func NewBlockStore(db dbm.DB) *BlockStore {
 	bsjson := LoadBlockStoreStateJSON(db)
 	return &BlockStore{
@@ -54,7 +54,7 @@ func (bs *BlockStore) Height() int {
 
 // GetReader returns the value associated with the given key wrapped in an io.Reader.
 // If no value is found, it returns nil.
-// Its mainly for use with wire.ReadBinary.
+// It's mainly for use with wire.ReadBinary.
 func (bs *BlockStore) GetReader(key []byte) io.Reader {
 	bytez := bs.db.Get(key)
 	if bytez == nil {
@@ -249,7 +249,7 @@ func (bsj BlockStoreStateJSON) Save(db dbm.DB) {
 }
 
 // LoadBlockStoreStateJSON returns the BlockStoreStateJSON as loaded from disk.
-// If no BlockStoreStateJSON was previously persisted, it returns a zero value one.
+// If no BlockStoreStateJSON was previously persisted, it returns the zero value.
 func LoadBlockStoreStateJSON(db dbm.DB) BlockStoreStateJSON {
 	bytes := db.Get(blockStoreKey)
 	if bytes == nil {
