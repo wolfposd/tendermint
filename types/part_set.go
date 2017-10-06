@@ -66,6 +66,19 @@ func (psh PartSetHeader) String() string {
 	return fmt.Sprintf("%v:%X", psh.Total, cmn.Fingerprint(psh.Hash))
 }
 
+func (psh *PartSetHeader) Copy() *PartSetHeader {
+	if psh == nil {
+		return nil
+	}
+	pshc := *psh
+	if len(psh.Hash) > 0 {
+		buf := make([]byte, len(psh.Hash))
+		copy(buf, psh.Hash)
+		pshc.Hash = buf
+	}
+	return &pshc
+}
+
 func (psh PartSetHeader) IsZero() bool {
 	return psh.Total == 0
 }
@@ -162,6 +175,19 @@ func (ps *PartSet) Hash() []byte {
 		return nil
 	}
 	return ps.hash
+}
+
+func (ps *PartSet) Copy() *PartSet {
+	if ps == nil {
+		return nil
+	}
+	psc := *ps
+	// 1. ps.hash is unexported so can't be
+	// directly mutated, hence no need
+	// for a deep copy of it.
+	// 2. Same for parts and
+	// 3. partsBitArray
+	return &psc
 }
 
 func (ps *PartSet) HashesTo(hash []byte) bool {

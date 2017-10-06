@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	cmn "github.com/tendermint/tmlibs/common"
 )
 
@@ -87,4 +89,12 @@ func TestWrongProof(t *testing.T) {
 		t.Errorf("Expected to fail adding a part with bad bytes.")
 	}
 
+}
+
+func TestPartSetCopy(t *testing.T) {
+	data := cmn.RandBytes(10)
+	ps1 := NewPartSetFromData(data, testPartSize)
+	ps2 := ps1.Copy()
+	require.Equal(t, ps2, ps1, "a copy should return the same")
+	// No need to test mutations to ps2.hash since ps2.hash is unexposed
 }

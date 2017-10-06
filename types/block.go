@@ -416,6 +416,21 @@ type BlockID struct {
 	PartsHeader PartSetHeader `json:"parts"`
 }
 
+// Copy performs a deep copy of the BlockID
+func (bi *BlockID) Copy() *BlockID {
+	if bi == nil {
+		return nil
+	}
+	bic := *bi
+	if len(bi.Hash) > 0 {
+		hBuf := make([]byte, len(bi.Hash))
+		copy(hBuf, bi.Hash)
+		bic.Hash = hBuf
+	}
+	bic.PartsHeader = *(bi.PartsHeader.Copy())
+	return &bic
+}
+
 // IsZero returns true if this is the BlockID for a nil-block
 func (blockID BlockID) IsZero() bool {
 	return len(blockID.Hash) == 0 && blockID.PartsHeader.IsZero()
