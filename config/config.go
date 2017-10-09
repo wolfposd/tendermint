@@ -8,16 +8,16 @@ import (
 
 var (
 	DefaultTendermintDir = ".tendermint"
-	DefaultConfigDir     = "config"
-	DefaultDataDir       = "data"
+	defaultConfigDir     = "config"
+	defaultDataDir       = "data"
 
-	DefaultConfigFileName  = "config.toml"
-	DefaultGenesisJSONName = "genesis.json"
-	DefaultPrivValName     = "priv_validator.json"
+	defaultConfigFileName  = "config.toml"
+	defaultGenesisJSONName = "genesis.json"
+	defaultPrivValName     = "priv_validator.json"
 
-	DefaultConfigFilePath  = filepath.Join(DefaultConfigDir, DefaultConfigFileName)
-	DefaultGenesisJSONPath = filepath.Join(DefaultConfigDir, DefaultGenesisJSONName)
-	DefaultPrivValPath     = filepath.Join(DefaultConfigDir, DefaultPrivValName)
+	defaultConfigFilePath  = filepath.Join(defaultConfigDir, defaultConfigFileName)
+	defaultGenesisJSONPath = filepath.Join(defaultConfigDir, defaultGenesisJSONName)
+	defaultPrivValPath     = filepath.Join(defaultConfigDir, defaultPrivValName)
 )
 
 // Config defines the top level configuration for a Tendermint node
@@ -120,8 +120,8 @@ type BaseConfig struct {
 // DefaultBaseConfig returns a default base configuration for a Tendermint node
 func DefaultBaseConfig() BaseConfig {
 	return BaseConfig{
-		Genesis:           DefaultGenesisJSONPath,
-		PrivValidator:     DefaultPrivValPath,
+		Genesis:           defaultGenesisJSONPath,
+		PrivValidator:     defaultPrivValPath,
 		Moniker:           "anonymous",
 		ProxyApp:          "tcp://127.0.0.1:46658",
 		ABCI:              "socket",
@@ -292,7 +292,7 @@ func DefaultMempoolConfig() *MempoolConfig {
 		Recheck:      true,
 		RecheckEmpty: true,
 		Broadcast:    true,
-		WalPath:      filepath.Join(DefaultDataDir, "mempool.wal"),
+		WalPath:      filepath.Join(defaultDataDir, "mempool.wal"),
 	}
 }
 
@@ -380,7 +380,7 @@ func (cfg *ConsensusConfig) PeerQueryMaj23Sleep() time.Duration {
 // DefaultConsensusConfig returns a default configuration for the consensus service
 func DefaultConsensusConfig() *ConsensusConfig {
 	return &ConsensusConfig{
-		WalPath:                     filepath.Join(DefaultDataDir, "cs.wal/wal"),
+		WalPath:                     filepath.Join(defaultDataDir, "cs.wal/wal"),
 		WalLight:                    false,
 		TimeoutPropose:              3000,
 		TimeoutProposeDelta:         500,

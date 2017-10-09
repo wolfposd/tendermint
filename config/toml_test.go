@@ -30,7 +30,7 @@ func TestEnsureRoot(t *testing.T) {
 	EnsureRoot(tmpDir)
 
 	// make sure config is set properly
-	data, err := ioutil.ReadFile(filepath.Join(tmpDir, DefaultConfigFilePath))
+	data, err := ioutil.ReadFile(filepath.Join(tmpDir, defaultConfigFilePath))
 	require.Nil(err)
 	assert.Equal([]byte(defaultConfig("anonymous")), data)
 
@@ -47,11 +47,11 @@ func TestEnsureTestRoot(t *testing.T) {
 	rootDir := cfg.RootDir
 
 	// make sure config is set properly
-	data, err := ioutil.ReadFile(filepath.Join(rootDir, DefaultConfigFilePath))
+	data, err := ioutil.ReadFile(filepath.Join(rootDir, defaultConfigFilePath))
 	require.Nil(err)
 	assert.Equal([]byte(testConfig("anonymous")), data)
 
 	// TODO: make sure the cfg returned and testconfig are the same!
-
-	ensureFiles(t, rootDir, DefaultDataDir, DefaultGenesisJSONPath, DefaultPrivValPath)
+	baseConfig := DefaultBaseConfig()
+	ensureFiles(t, rootDir, defaultDataDir, baseConfig.Genesis, baseConfig.PrivValidator)
 }
