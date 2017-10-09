@@ -65,7 +65,12 @@ func (vote *Vote) WriteSignBytes(chainID string, w io.Writer, n *int, err *error
 }
 
 func (vote *Vote) Copy() *Vote {
+	if vote == nil {
+		return nil
+	}
 	voteCopy := *vote
+	voteCopy.ValidatorAddress = copyBytes(vote.ValidatorAddress)
+	voteCopy.BlockID = *(vote.BlockID.Copy())
 	return &voteCopy
 }
 
